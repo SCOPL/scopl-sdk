@@ -2,6 +2,14 @@
   "name": "@scopl/sdk",
   "version": "0.1.0",
   "description": "TypeScript SDK for SCOPL's public V2 limit-order integration API",
+  "homepage": "https://github.com/SCOPL/scopl-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/SCOPL/scopl-sdk/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SCOPL/scopl-sdk.git"
+  },
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -32,6 +40,8 @@
     "build": "npm run clean && tsc -p tsconfig.build.json && tsc -p tsconfig.cjs.json && node ./scripts/finish-build.mjs",
     "examples:typecheck": "tsc -p tsconfig.examples.json --noEmit",
     "smoke": "npm run examples:typecheck && node ./scripts/smoke.mjs",
+    "pack:check": "npm pack --dry-run",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build && npm run smoke && npm run pack:check",
     "prepack": "npm run build"
   },
   "engines": {
@@ -46,9 +56,13 @@
     }
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.10.2",
+    "eslint": "^10.11.0",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.70.1",
     "viem": "^2.49.0",
-    "vitest": "^2.1.8"
+    "vitest": "4.1.11"
   },
   "publishConfig": {
     "access": "public"

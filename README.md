@@ -50,7 +50,28 @@ const plan = await scopl.integrations.buildRegistration({
 // plan.transaction is unsigned. The integration owner signs and broadcasts it.
 ```
 
-`buildUpdate()` similarly builds owner-only unsigned calldata. Neither HTTP call changes chain state. The SDK validates the returned destination against the current chain's order policy.
+The integration owner controls both its fee recipient and the trader/integrator split. SCOPL's protocol share remains fixed at 2,500 bps; the remaining 7,500 bps are divided as follows:
+
+```text
+trader share     = userShareBps
+integrator share = 7,500 - userShareBps
+SCOPL share      = 2,500
+```
+
+For example, `userShareBps: 3_750` gives 37.5% of generated LP fees to the trader, 37.5% to the integration's `feeRecipient`, and 25% to SCOPL. Setting it to `0` gives the full 75% integration allocation to the integrator; setting it to `7_500` gives that allocation entirely to the trader.
+
+`buildUpdate()` builds owner-only unsigned calldata that can change `feeRecipient` and `userShareBps` without creating a new integration:
+
+```ts
+const update = await scopl.integrations.buildUpdate({
+  chainId: 4663,
+  integrationId: plan.integrationId,
+  feeRecipient: "0x...",
+  userShareBps: 5_000
+});
+```
+
+Neither HTTP call changes chain state. The integration owner must sign and broadcast the returned transaction, and the SDK validates its destination against the current chain's order policy.
 
 ## Find pools
 
