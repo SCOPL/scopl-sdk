@@ -42,6 +42,7 @@ export interface QuoteRequest extends RequestOptions {
   venueId?: VenueId;
   pool: Address | Bytes32;
   tokenIn: Address;
+  /** Human token amount, for example "1" or "0.1"; never base units/wei. */
   amountIn: string;
   price: string;
   owner?: Address;

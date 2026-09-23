@@ -16,7 +16,7 @@ const request: QuoteRequest = {
   venueId: "ramses-v3",
   pool: A,
   tokenIn: C,
-  amountIn: "1000000000000000001",
+  amountIn: "1.000000000000000001",
   price: "1.234567890123456789",
   slippageBps: 100,
   deadlineSeconds: 600,
@@ -45,6 +45,39 @@ describe("quote client", () => {
       requestedPrice: "1.2345",
       executionPrice: "1.2344",
       adjustmentReason: "tick-rounding"
+    });
+  });
+
+  it("normalizes scientific API prices into quote-compatible decimal strings", async () => {
+    const client = new ScoplClient({
+      fetch: (async () => jsonResponse({
+        apiVersion: "2.0.0",
+        chainId: 4663,
+        currentTick: 191_000,
+        options: [{
+          tickLower: 190_800,
+          tickUpper: 191_000,
+          executionPrice: "5.12545998065e-9",
+          fullFillPrice: "5.17696912152e-9",
+          rangeLow: "4.97398720608e-9",
+          rangeHigh: "5.17696912152e-9"
+        }],
+        totalPossible: "1"
+      })) as ScoplFetch
+    });
+
+    const prices = await client.limitOrders.prices({
+      chainId: 4663,
+      venueId: "uniswap-v4",
+      pool: POOL_ID,
+      tokenIn: A
+    });
+
+    expect(prices.options[0]).toMatchObject({
+      executionPrice: "0.00000000512545998065",
+      fullFillPrice: "0.00000000517696912152",
+      rangeLow: "0.00000000497398720608",
+      rangeHigh: "0.00000000517696912152"
     });
   });
 

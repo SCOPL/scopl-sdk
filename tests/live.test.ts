@@ -24,4 +24,25 @@ describe.skipIf(!live)("live read-only SCOPL API", () => {
     expect((await openapi.json() as { openapi?: string }).openapi).toBe("3.1.0");
     expect(pools.source).toBe("scopl-indexer");
   });
+
+  it("returns reusable plain-decimal prices for a live V4 pool", async () => {
+    const pools = await client.pools.list({
+      venueId: "uniswap-v4",
+      protocolVersion: 4
+    });
+    const pool = pools.data.find((candidate) => candidate.supported);
+    expect(pool).toBeDefined();
+
+    const prices = await client.limitOrders.prices({
+      chainId: 4663,
+      venueId: "uniswap-v4",
+      pool: pool!.address,
+      tokenIn: pool!.baseTokenAddress,
+      count: 3
+    });
+    expect(prices.options.length).toBeGreaterThan(0);
+    for (const option of prices.options) {
+      expect(option.executionPrice).toMatch(/^\d+(?:\.\d+)?$/);
+    }
+  });
 });

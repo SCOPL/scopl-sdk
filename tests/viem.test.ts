@@ -147,7 +147,7 @@ describe("high-level createLimitOrder", () => {
         venueId: "uniswap-v3",
         pool: A,
         tokenIn: C,
-        amountIn: "1000000000000000000",
+        amountIn: "1",
         price: "1.25"
       },
       walletClient: mock.walletClient,

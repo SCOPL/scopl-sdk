@@ -16,7 +16,7 @@ const quote = await scopl.limitOrders.quote({
   pool: poolId,
   tokenIn: zeroAddress,
   funding: "native",
-  amountIn: "10000000000000000",
+  amountIn: "0.01",
   price: "1.25"
 });
 

@@ -109,7 +109,7 @@ const quote = await scopl.limitOrders.quote({
   venueId: "ramses-v3",
   pool: "0x...",
   tokenIn: "0x...",
-  amountIn: "1000000000000000000",
+  amountIn: "1", // human token amount, not base units/wei
   price: "1.25",
   owner: "0x...",
   funding: "erc20",
@@ -163,7 +163,7 @@ const result = await createLimitOrder({
     venueId: "uniswap-v3",
     pool: "0x...",
     tokenIn: "0x...",
-    amountIn: "1000000000000000000",
+    amountIn: "1", // human token amount, not base units/wei
     price: "1.25"
   }
 });
@@ -247,7 +247,7 @@ await scopl.limitOrders.quote({
   pool: v3PoolAddress,
   tokenIn: wrappedNativeAddress,
   funding: "native",
-  amountIn: "10000000000000000",
+  amountIn: "0.01", // 0.01 WETH supplied as native ETH
   price: "1.25"
 });
 ```
@@ -264,7 +264,7 @@ await scopl.limitOrders.quote({
   pool: poolId, // bytes32
   tokenIn: "0x0000000000000000000000000000000000000000",
   funding: "native",
-  amountIn: "10000000000000000",
+  amountIn: "0.01", // 0.01 native ETH
   price: "1.25"
 });
 ```

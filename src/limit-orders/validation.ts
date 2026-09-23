@@ -18,6 +18,7 @@ import {
   integer,
   optionalAddress,
   positiveDecimal,
+  positiveDecimalResponse,
   record,
   string,
   venueId
@@ -108,16 +109,16 @@ function parsePriceOption(value: unknown, path: string): PriceOption {
   return {
     tickLower: integer(option.tickLower, `${path}.tickLower`),
     tickUpper: integer(option.tickUpper, `${path}.tickUpper`),
-    executionPrice: positiveDecimal(option.executionPrice, `${path}.executionPrice`),
+    executionPrice: positiveDecimalResponse(option.executionPrice, `${path}.executionPrice`),
     ...(option.fullFillPrice === undefined
       ? {}
-      : { fullFillPrice: positiveDecimal(option.fullFillPrice, `${path}.fullFillPrice`) }),
+      : { fullFillPrice: positiveDecimalResponse(option.fullFillPrice, `${path}.fullFillPrice`) }),
     ...(option.rangeLow === undefined
       ? {}
-      : { rangeLow: positiveDecimal(option.rangeLow, `${path}.rangeLow`) }),
+      : { rangeLow: positiveDecimalResponse(option.rangeLow, `${path}.rangeLow`) }),
     ...(option.rangeHigh === undefined
       ? {}
-      : { rangeHigh: positiveDecimal(option.rangeHigh, `${path}.rangeHigh`) })
+      : { rangeHigh: positiveDecimalResponse(option.rangeHigh, `${path}.rangeHigh`) })
   };
 }
 
@@ -157,8 +158,8 @@ export function parseQuoteResponse(value: unknown): QuoteResponse {
     ),
     price: {
       ...price,
-      requestedPrice: positiveDecimal(price.requestedPrice, "quote.price.requestedPrice"),
-      executionPrice: positiveDecimal(price.executionPrice, "quote.price.executionPrice"),
+      requestedPrice: positiveDecimalResponse(price.requestedPrice, "quote.price.requestedPrice"),
+      executionPrice: positiveDecimalResponse(price.executionPrice, "quote.price.executionPrice"),
       adjustmentReason: adjustment as PriceAdjustmentReason,
       priceDifferenceBps: finiteNumber(
         price.priceDifferenceBps,

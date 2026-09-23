@@ -12,6 +12,7 @@ const BYTES32 = /^0x[a-fA-F0-9]{64}$/;
 const HEX = /^0x(?:[a-fA-F0-9]{2})*$/;
 const DECIMAL_INTEGER = /^\d+$/;
 const POSITIVE_DECIMAL = /^(?:0|[1-9]\d*)(?:\.\d+)?$/;
+const SCIENTIFIC_DECIMAL = /^(\d+)(?:\.(\d+))?[eE]([+-]?\d+)$/;
 const VENUES = new Set<VenueId>(["uniswap-v3", "ramses-v3", "uniswap-v4"]);
 
 export function record(value: unknown, path = "response"): Record<string, unknown> {
@@ -89,6 +90,26 @@ export function positiveDecimal(value: unknown, path: string): string {
     throw new ScoplValidationError("Expected a positive decimal string", path);
   }
   return result;
+}
+
+export function positiveDecimalResponse(value: unknown, path: string): string {
+  const result = string(value, path);
+  const scientific = SCIENTIFIC_DECIMAL.exec(result);
+  if (!scientific) return positiveDecimal(result, path);
+  const exponent = Number(scientific[3]);
+  if (!Number.isSafeInteger(exponent) || Math.abs(exponent) > 1_000) {
+    throw new ScoplValidationError("Expected a positive decimal string", path);
+  }
+  const integer = scientific[1] ?? "";
+  const fraction = scientific[2] ?? "";
+  const digits = `${integer}${fraction}`;
+  const decimalIndex = integer.length + exponent;
+  const expanded = decimalIndex <= 0
+    ? `0.${"0".repeat(-decimalIndex)}${digits}`
+    : decimalIndex >= digits.length
+      ? `${digits}${"0".repeat(decimalIndex - digits.length)}`
+      : `${digits.slice(0, decimalIndex)}.${digits.slice(decimalIndex)}`;
+  return positiveDecimal(expanded, path);
 }
 
 export function venueId(value: unknown, path: string): VenueId {

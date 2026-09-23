@@ -22,7 +22,7 @@ export async function createOrderWithConnectedWallet(input: {
       venueId: "uniswap-v3",
       pool: input.pool,
       tokenIn: input.tokenIn,
-      amountIn: "1000000000000000000",
+      amountIn: "1",
       price: "1.25"
     }
   });

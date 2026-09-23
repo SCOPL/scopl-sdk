@@ -18,7 +18,7 @@ const quote = await scopl.limitOrders.quote({
   venueId: "ramses-v3",
   pool,
   tokenIn,
-  amountIn: "1000000000000000000",
+  amountIn: "1",
   price: validPrices.options[0]?.executionPrice ?? "1"
 });
 
