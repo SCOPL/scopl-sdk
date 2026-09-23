@@ -1,0 +1,56 @@
+{
+  "name": "@scopl/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for SCOPL's public V2 limit-order integration API",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./viem": {
+      "types": "./dist/esm/viem/index.d.ts",
+      "import": "./dist/esm/viem/index.js",
+      "require": "./dist/cjs/viem/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "clean": "node ./scripts/prepare-build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src tests examples --max-warnings=0",
+    "test": "vitest run --config vitest.config.ts",
+    "build": "npm run clean && tsc -p tsconfig.build.json && tsc -p tsconfig.cjs.json && node ./scripts/finish-build.mjs",
+    "examples:typecheck": "tsc -p tsconfig.examples.json --noEmit",
+    "smoke": "npm run examples:typecheck && node ./scripts/smoke.mjs",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "viem": "^2.49.0"
+  },
+  "peerDependenciesMeta": {
+    "viem": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "viem": "^2.49.0",
+    "vitest": "^2.1.8"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

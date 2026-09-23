@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@scopl/sdk": ["./src/index.ts"],
+      "@scopl/sdk/viem": ["./src/viem/index.ts"]
+    }
+  },
+  "include": ["examples/**/*.ts", "src/**/*.ts"]
+}
