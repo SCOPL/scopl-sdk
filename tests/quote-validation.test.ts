@@ -24,6 +24,35 @@ const request: QuoteRequest = {
 };
 
 describe("quote client", () => {
+  it("injects a client-level integration ID and still permits an explicit override", async () => {
+    const bodies: Array<Record<string, unknown>> = [];
+    const fetch = vi.fn<ScoplFetch>(async (_input, init) => {
+      bodies.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
+      return jsonResponse(quoteFixture);
+    });
+    const client = new ScoplClient({ fetch, integrationId: ID });
+    const withoutIntegrationId: QuoteRequest = { ...request };
+    delete withoutIntegrationId.integrationId;
+
+    await client.limitOrders.quote(withoutIntegrationId);
+    await client.limitOrders.quote({ ...withoutIntegrationId, integrationId: POOL_ID });
+
+    expect(client.integrationId).toBe(ID);
+    expect(bodies[0]?.integrationId).toBe(ID);
+    expect(bodies[1]?.integrationId).toBe(POOL_ID);
+  });
+
+  it("fails clearly when no integration ID is configured or supplied", async () => {
+    const client = new ScoplClient({
+      fetch: (async () => jsonResponse(quoteFixture)) as ScoplFetch
+    });
+    const withoutIntegrationId: QuoteRequest = { ...request };
+    delete withoutIntegrationId.integrationId;
+
+    await expect(client.limitOrders.quote(withoutIntegrationId))
+      .rejects.toThrow("Configure it once on ScoplClient");
+  });
+
   it("preserves decimal strings, owner optionality, Ramses venue, and transaction order", async () => {
     let posted: unknown;
     const fetch = vi.fn<ScoplFetch>(async (_input, init) => {

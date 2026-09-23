@@ -4,6 +4,7 @@
  * response types and runtime validation around these request schemas.
  */
 export interface paths {
+  "/api/indexer/pools": { get: { responses: { 200: unknown } } };
   "/api/v2/limit-orders/config": { get: { responses: { 200: unknown } } };
   "/api/v2/limit-orders/prices": {
     post: { requestBody: { content: { "application/json": components["schemas"]["PricesRequest"] } } };
@@ -40,6 +41,13 @@ export interface paths {
 export interface components {
   schemas: {
     VenueId: "uniswap-v3" | "ramses-v3" | "uniswap-v4";
+    PoolDirectoryQuery: {
+      chainId?: number;
+      venueId?: components["schemas"]["VenueId"];
+      token?: string;
+      quoteToken?: string;
+      protocolVersion?: 3 | 4;
+    };
     PricesRequest: {
       chainId: number;
       venueId?: components["schemas"]["VenueId"];

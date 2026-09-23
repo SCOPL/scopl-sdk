@@ -34,9 +34,12 @@ const local = new ScoplClient({
 
 Configuration is cached for five minutes by default. `scopl.config.refresh()` bypasses the cache. Writable manager and position-manager addresses always come from current runtime configuration; the SDK contains no authoritative hardcoded deployment addresses.
 
-## Register an integration
+## One-time integration setup
 
-Registration is chain-local even though the same owner and registration key derive the same logical integration ID across chains.
+Registration creates the `integrationId` used by quotes and configures the fee
+recipient and user share in the same owner-signed transaction. It is chain-local
+even though the same owner and registration key derive the same logical
+integration ID across chains.
 
 ```ts
 const plan = await scopl.integrations.buildRegistration({
@@ -50,7 +53,23 @@ const plan = await scopl.integrations.buildRegistration({
 // plan.transaction is unsigned. The integration owner signs and broadcasts it.
 ```
 
-The integration owner controls both its fee recipient and the trader/integrator split. SCOPL's protocol share remains fixed at 2,500 bps; the remaining 7,500 bps are divided as follows:
+After the registration transaction confirms, configure its returned identity once:
+
+```ts
+const scopl = new ScoplClient({ integrationId: plan.integrationId });
+```
+
+The client injects this value into subsequent quotes. A specific quote can still
+override it when an application intentionally operates multiple integrations.
+
+`registrationKey` is a public 32-byte namespace, not a password, private key,
+or API credential. The order policy derives `integrationId` as
+`keccak256(abi.encode(owner, registrationKey))`. Generate it once, store it with
+the integration configuration, and reuse it with the same owner when you want
+the same logical integration ID across chains. A different key creates a
+separate integration. It appears in public calldata and must contain no secret.
+
+The integration owner configures both its fee recipient and the trader/integrator split directly in `buildRegistration()`. SCOPL's protocol share remains fixed at 2,500 bps; the remaining 7,500 bps are divided as follows:
 
 ```text
 trader share     = userShareBps
@@ -77,13 +96,17 @@ Neither HTTP call changes chain state. The integration owner must sign and broad
 
 ```ts
 const result = await scopl.pools.list({
+  chainId: 4663,
   venueId: "ramses-v3",
   protocolVersion: 3,
-  token: "0x..."
+  token: "0x...",
+  quoteToken: "0x..." // optional counter token
 });
 ```
 
-Pool discovery is an indexed read model. The current directory does not publish a stable per-record `chainId`, so the SDK does not pretend it can safely chain-filter that response; chain selection remains explicit at quote time. Raw additive fields remain available, but analytics fields are intentionally not over-modeled. A pool record is never authorization to spend: current config and the quote API remain authoritative.
+Pool discovery checks the ranked directory first. If `token` or `quoteToken` is provided and no ranked pool matches, the SDK automatically searches the complete factory-event index. This makes low-volume and newly indexed pools discoverable without slowing down the default directory request. The exhaustive path reads indexed creation events and does not perform historical RPC calls. Omit `venueId` to include every enabled venue. Omit `quoteToken` to return every pool containing `token`, or provide any ERC-20 address for a specific pair. Address zero requests native-equivalent pools and includes wrapped-native V3 pools; use the WETH address when you specifically want Ramses V3.
+
+The request and response carry `chainId`; an unsupported chain fails explicitly instead of returning an ambiguous directory. Raw additive fields remain available, but analytics fields are intentionally not over-modeled. A pool record is never authorization to spend: current config and the quote API remain authoritative.
 
 ## Get valid prices
 
@@ -105,18 +128,23 @@ All human amounts and prices are decimal strings. Raw uints, block numbers, toke
 ```ts
 const quote = await scopl.limitOrders.quote({
   chainId: 4663,
-  integrationId: "0x...",
   venueId: "ramses-v3",
   pool: "0x...",
   tokenIn: "0x...",
   amountIn: "1", // human token amount, not base units/wei
   price: "1.25",
   owner: "0x...",
-  funding: "erc20",
-  slippageBps: 100,
-  deadlineSeconds: 600
+
+  // Optional execution policy overrides:
+  slippageBps: 100,     // default: 50 (0.5%)
+  deadlineSeconds: 600  // default: 1,200 (20 minutes)
 });
 ```
+
+`slippageBps`, `deadlineSeconds`, and `priceOptionCount` are optional policy
+overrides. Token-address inputs use ERC-20 funding by default. Specify
+`funding: "native"` only when the user intentionally pays ETH into a supported
+native/WETH route.
 
 Integration economics are resolved by SCOPL registration. Quote requests cannot inject arbitrary recipients, referral attribution, or revenue shares.
 
@@ -159,7 +187,6 @@ const result = await createLimitOrder({
   account,
   request: {
     chainId: 4663,
-    integrationId: "0x...",
     venueId: "uniswap-v3",
     pool: "0x...",
     tokenIn: "0x...",

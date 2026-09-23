@@ -63,6 +63,9 @@ export function validatePriceOptionsRequest(request: PriceOptionsRequest): void 
 
 export function validateQuoteRequest(request: QuoteRequest): void {
   validatePriceOptionsRequest(request);
+  if (!request.integrationId) {
+    throw new ScoplValidationError("integrationId is required.", "integrationId");
+  }
   assertBytes32(request.integrationId, "integrationId");
   if (/^0x0{64}$/i.test(request.integrationId)) {
     throw new ScoplValidationError("integrationId cannot be zero.", "integrationId");

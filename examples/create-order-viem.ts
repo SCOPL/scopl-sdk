@@ -10,7 +10,7 @@ export async function createOrderWithConnectedWallet(input: {
   pool: Address;
   tokenIn: Address;
 }) {
-  const client = new ScoplClient();
+  const client = new ScoplClient({ integrationId: input.integrationId });
   return createLimitOrder({
     client,
     walletClient: input.walletClient,
@@ -18,7 +18,6 @@ export async function createOrderWithConnectedWallet(input: {
     account: input.account,
     request: {
       chainId: 4663,
-      integrationId: input.integrationId,
       venueId: "uniswap-v3",
       pool: input.pool,
       tokenIn: input.tokenIn,

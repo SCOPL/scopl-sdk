@@ -4,14 +4,13 @@ import {
   type Bytes32
 } from "@scopl/sdk";
 
-const scopl = new ScoplClient();
 const zeroAddress = "0x0000000000000000000000000000000000000000" satisfies Address;
 const integrationId: Bytes32 = `0x${"ab".repeat(32)}`;
+const scopl = new ScoplClient({ integrationId });
 const poolId: Bytes32 = `0x${"cd".repeat(32)}`;
 
 const quote = await scopl.limitOrders.quote({
   chainId: 4663,
-  integrationId,
   venueId: "uniswap-v4",
   pool: poolId,
   tokenIn: zeroAddress,

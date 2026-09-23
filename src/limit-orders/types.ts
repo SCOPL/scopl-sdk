@@ -38,7 +38,8 @@ export interface PriceOptionsResponse {
 
 export interface QuoteRequest extends RequestOptions {
   chainId: number;
-  integrationId: Bytes32;
+  /** Overrides the integrationId configured on ScoplClient. */
+  integrationId?: Bytes32;
   venueId?: VenueId;
   pool: Address | Bytes32;
   tokenIn: Address;

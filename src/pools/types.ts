@@ -18,6 +18,7 @@ export interface PoolRecord {
 export interface PoolsResponse {
   data: PoolRecord[];
   source: "scopl-indexer";
+  chainId: number;
   blockNumber?: string;
   updatedAt: string;
   page: number;
@@ -27,7 +28,13 @@ export interface PoolsResponse {
 }
 
 export interface PoolFilters extends RequestOptions {
+  /** Destination chain. Defaults to the canonical Robinhood Chain deployment (4663). */
+  chainId?: number;
+  /** Omit to include every enabled venue. */
   venueId?: VenueId;
+  /** Require this token on either side of the pool. */
   token?: Address;
+  /** Optionally require a counter token. Address zero requests the native equivalent. */
+  quoteToken?: Address;
   protocolVersion?: ProtocolVersion;
 }

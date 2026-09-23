@@ -36,6 +36,7 @@ import {
   validateQuoteRequest
 } from "./validation.js";
 import { assertChainId, assertHash } from "../utils/validation.js";
+import type { Bytes32 } from "../types.js";
 
 function bodyWithoutSignal<T extends { signal?: AbortSignal }>(request: T): Omit<T, "signal"> {
   const body = { ...request };
@@ -52,7 +53,10 @@ function retryAfterFromHeader(headers: Headers): number | null {
 }
 
 export class LimitOrdersClient {
-  constructor(private readonly transport: ScoplTransport) {}
+  constructor(
+    private readonly transport: ScoplTransport,
+    private readonly defaultIntegrationId?: Bytes32
+  ) {}
 
   async prices(request: PriceOptionsRequest): Promise<PriceOptionsResponse> {
     validatePriceOptionsRequest(request);
@@ -64,10 +68,22 @@ export class LimitOrdersClient {
   }
 
   async quote(request: QuoteRequest): Promise<QuoteResponse> {
-    validateQuoteRequest(request);
+    const integrationId = request.integrationId ?? this.defaultIntegrationId;
+    if (!integrationId) {
+      throw new ScoplValidationError(
+        "integrationId is required. Configure it once on ScoplClient or provide it for this quote.",
+        "integrationId"
+      );
+    }
+    const resolvedRequest = { ...request, integrationId };
+    validateQuoteRequest(resolvedRequest);
     return (await this.transport.json(
       "/api/v2/limit-orders/quote",
-      { method: "POST", body: bodyWithoutSignal(request), signal: request.signal },
+      {
+        method: "POST",
+        body: bodyWithoutSignal(resolvedRequest),
+        signal: request.signal
+      },
       parseQuoteResponse
     )).data;
   }

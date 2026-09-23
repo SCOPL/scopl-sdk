@@ -21,8 +21,14 @@ describe.skipIf(!live)("live read-only SCOPL API", () => {
       client.pools.list()
     ]);
     expect(openapi.ok).toBe(true);
-    expect((await openapi.json() as { openapi?: string }).openapi).toBe("3.1.0");
+    const document = await openapi.json() as {
+      openapi?: string;
+      paths?: Record<string, unknown>;
+    };
+    expect(document.openapi).toBe("3.1.0");
+    expect(document.paths).toHaveProperty("/api/indexer/pools");
     expect(pools.source).toBe("scopl-indexer");
+    expect(pools.chainId).toBe(4663);
   });
 
   it("returns reusable plain-decimal prices for a live V4 pool", async () => {

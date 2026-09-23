@@ -1,6 +1,6 @@
 {
   "name": "@scopl/sdk",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "license": "MIT",
   "description": "TypeScript SDK for SCOPL's public V2 limit-order integration API",
   "homepage": "https://github.com/SCOPL/scopl-sdk#readme",
